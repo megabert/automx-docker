@@ -18,7 +18,7 @@ configuration is stored.
 * A DNS-Record (A or CNAME) autodiscover.yourdomain.tld pointing to your autodiscover service
 * An httpS Server running the autodiscover application
 * A valid SSL-Certificate for autodiscover.yourdomain.tld (if you are trying to serve 
-  multiple domains, you need a valid certificate for all domains, this solution does not work)
+  multiple domains, you need a valid certificate for all domains, this docker setup does not use this Variant)
 
 ### Variant B (Hack, but easier)
 
