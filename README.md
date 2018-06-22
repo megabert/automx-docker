@@ -1,7 +1,7 @@
 # AutoMX Docker Setup
 
 This is some scripting to set up automx (http://automx.org) as docker containers. 
-There are 2 containers. One for automx and another for Mariadb, where the domain
+There are 2 containers. One for automx and another for MariaDB, where the domain
 configuration is stored.
 
 # Principle of E-Mail-Autoconfiguration
@@ -76,4 +76,4 @@ docker inspect config_db | grep -i ipaddress
 
 * adapt and run the following query to insert the data for your domain
 
-mysql -uroot -pYOURROOTPW -h IPADDRESS -e "INSERT INTO automx VALUES(1,'yourdomain.de','yes','yoursmtpserver.domain.tld','587','starttls','plaintext','%s','yes','6','yes','yourimapserver.domain.tld','143','starttls','plaintext','%s','6','yes','yourpop3server.domain.tld','110','starttls','plaintext','%s','6');
+```mysql -uroot -pYOURROOTPW -h IPADDRESS -e "INSERT INTO automx VALUES(1,'yourdomain.de','yes','yoursmtpserver.domain.tld','587','starttls','plaintext','%s','yes','6','yes','yourimapserver.domain.tld','143','starttls','plaintext','%s','6','yes','yourpop3server.domain.tld','110','starttls','plaintext','%s','6');```
