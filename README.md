@@ -55,6 +55,7 @@ To use this installation you need Variant B)
 
 For this docker system you need the following:
 
+* Docker of course
 * Ruby(for the template renderer)
 * A correct DNS-record autodiscover.servicedomain.tld
 * The above mentioned 3 records for each domain you want to serve with autodiscover
@@ -68,9 +69,9 @@ For this docker system you need the following:
 
 A script for this may come later or maybe you write one.
 
-* Figure out the ip addres of the config_db container
+* Figure out the ip address of the config_db container
  
-docker inspect config_db | grep -i ipaddress
+```docker inspect config_db | grep -i ipaddress```
 
 * Install mariadb-client
 
