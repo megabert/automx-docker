@@ -25,11 +25,11 @@ configuration is stored.
 * A DNS-Record(A-Record) autodiscover.yourdomain.tld pointing to 0.0.0.0
 * A DNS-Record(SRV-Record) _autodiscover._tcp.yourdomain.tld containing
 
-ttl:			86400
-weight:			0
-priority:		0
-Port:			443
-Server:			autodiscover.servicedomain.tld
+* ttl:			86400
+* weight:			0
+* priority:		0
+* Port:			443
+* Server:			autodiscover.servicedomain.tld
 
 Example: 
 
