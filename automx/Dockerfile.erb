@@ -1,0 +1,55 @@
+FROM ubuntu:18.04
+ 
+ARG automx_version=<%= AUTOMX_VERSION %>
+ARG automx_source_url=https://github.com/sys4/automx/archive/v${automx_version}.tar.gz
+
+RUN apt-get -y update
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install wget apache2 libapache2-mod-wsgi apache2-utils python-ipaddr python-dateutil python-lxml python-memcache python-m2crypto python-mysqldb libsqlite3-0 sqlite3 python-pysqlite2 python-sqlalchemy python-pymysql
+RUN wget -q ${automx_source_url}
+RUN echo "Europe/Berlin" >/etc/timezone
+RUN mkdir -p /usr/local/lib/automx
+RUN tar -xvzf v${automx_version}.tar.gz
+RUN rm -f v${automx_version}.tar.gz
+RUN ln -s /automx-${automx_version} /automx
+RUN cp /automx/src/automx_wsgi.py /usr/local/lib/automx/
+RUN cp /automx/src/automx-test /usr/local/bin/automx-test
+RUN cp -r /automx/src/automx /usr/lib/python2.7
+RUN pwd
+RUN mkdir -p /etc/ssl/private
+RUN /usr/sbin/a2enmod wsgi
+RUN /usr/sbin/a2enmod ssl
+RUN /usr/sbin/a2dissite 000-default.conf
+RUN chown -R www-data:www-data /usr/local/lib/automx
+RUN touch /var/log/automx.log
+RUN chown www-data:www-data /var/log/automx.log
+
+ADD ./files/ssl/<%= AUTODISCOVER_HOSTNAME %>.pem      /etc/ssl/certs/<%= AUTODISCOVER_HOSTNAME %>.pem
+ADD ./files/ssl/<%= AUTODISCOVER_HOSTNAME %>.key      /etc/ssl/private/<%= AUTODISCOVER_HOSTNAME %>.key
+<%=
+if File.exists?("automx/files/ssl/#{AUTODISCOVER_HOSTNAME}.ca.pem") then
+"ADD ./files/ssl/#{AUTODISCOVER_HOSTNAME}.ca.pem /etc/ssl/certs/#{AUTODISCOVER_HOSTNAME}.ca.pem"
+end
+%>
+
+ADD ./files/automx/automx.conf /etc/automx.conf
+ADD ./files/apache/vhost.conf /etc/apache2/sites-enabled/000-automx.conf
+
+# For debugging
+# RUN apt-get update
+# RUN DEBIAN_FRONTEND=noninteractive apt-get -y install vim mariadb-client net-tools iputils-ping
+
+# Manually set up the apache environment variables
+ENV APACHE_RUN_USER www-data
+ENV APACHE_RUN_GROUP www-data
+ENV APACHE_LOG_DIR /var/log/apache2
+ENV APACHE_LOCK_DIR /var/lock/apache2
+ENV APACHE_PID_FILE /var/run/apache2.pid
+
+# Expose apache.
+EXPOSE 80
+EXPOSE 443
+
+# By default start up apache in the foreground, override with /bin/bash for interative.
+CMD /usr/sbin/apache2ctl -DFOREGROUND
+ 
+WORKDIR /var

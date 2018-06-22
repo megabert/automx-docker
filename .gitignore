@@ -1,0 +1,17 @@
+backup
+config_db/db_data/**
+config_db/db_dump/**
+
+!config_db/db_data/.empty 
+!config_db/db_dump/.empty 
+
+automx/Dockerfile
+automx/files/apache/vhost.conf
+automx/files/automx/automx.conf
+config_db/Dockerfile
+config_db/ENV
+config_db/initialize_databases
+
+pre-build-root.sh
+
+

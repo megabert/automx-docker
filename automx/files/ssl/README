@@ -1,0 +1,5 @@
+# Place your ssl certs here with the following naming convention:
+
+Key   = $AUTODISCOVER_HOSTNAME.key
+Cert  = $AUTODISCOVER_HOSTNAME.pem
+Chain = $AUTODISCOVER_HOSTNAME.ca.pem

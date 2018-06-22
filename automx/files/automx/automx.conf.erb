@@ -1,0 +1,50 @@
+[automx]
+debug = yes
+provider = <%= AUTOMX_PROVIDER_NAME %>
+domains = *
+
+[DEFAULT]
+account_type = email
+account_name = <%= AUTOMX_EMAIL_ACCOUNT_NAME %>
+account_name_short = <%= AUTOMX_EMAIL_ACCOUNT_NAME_SHORT %>
+
+
+# If a domain is listed in the automx section, it may have its own section. If
+# none is found here, the global section is used.
+[global]
+backend = sql
+action = settings
+
+host = mysql://<%= "#{AUTOMX_MYSQL_USERNAME}:#{AUTOMX_MYSQL_PASSWORD}@#{AUTOMX_MYSQL_SERVER}/#{AUTOMX_MYSQL_DBNAME}" %>
+
+# This query must be changed for your setup
+query = SELECT domain,smtp_server,smtp_enabled,smtp_port,smtp_encryption,smtp_auth,smtp_auth_identity,smtp_default,smtp_refresh_ttl,imap_enabled,imap_server,imap_port,imap_encryption,imap_auth,imap_auth_identity,imap_refresh_ttl,pop_enabled,pop_server,pop_port,pop_encryption,pop_auth,pop_auth_identity,pop_refresh_ttl FROM automx WHERE domain='%d';
+result_attrs = domain , smtp_server , smtp_enabled , smtp_port , smtp_encryption , smtp_auth , smtp_auth_identity , smtp_default , smtp_refresh_ttl , imap_enabled , imap_server , imap_port , imap_encryption , imap_auth , imap_auth_identity , imap_refresh_ttl , pop_enabled , pop_server , pop_port , pop_encryption , pop_auth , pop_auth_identity , pop_refresh_ttl
+
+smtp			= yes
+smtp_server		= ${smtp_server}
+smtp_port 		= ${smtp_port}
+smtp_encryption 	= ${smtp_encryption}
+smtp_auth 		= ${smtp_auth}
+smtp_auth_identity 	= ${smtp_auth_identity}
+smtp_default 		= ${smtp_default}
+# TODO Bug! smtp_refresh_ttl is not set when fetched from db
+smtp_refresh_ttl	= 6
+
+imap 			= yes
+imap_server 		= ${imap_server}
+imap_port		= ${imap_port}
+imap_encryption 	= ${imap_encryption}
+imap_auth 		= ${imap_auth}
+imap_auth_identity 	= ${imap_auth_identity}
+# TODO Bug! imap_refresh_ttl is not set when fetched from db
+imap_refresh_ttl	= 6
+
+pop 			= yes
+pop_server 		= ${pop_server}
+pop_port 		= ${pop_port}
+pop_encryption 		= ${pop_encryption}
+pop_auth		= ${pop_auth} 
+pop_auth_identity 	= ${pop_auth_identity}
+# TODO Bug! pop_refresh_ttl is not set when fetched from db
+pop_refresh_ttl		= 6

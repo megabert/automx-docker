@@ -1,0 +1,47 @@
+<VirtualHost *:443>
+
+	# autodiscover - with ssl for outlook
+
+	ServerName <%= AUTODISCOVER_HOSTNAME %>
+	ServerAdmin <%= WEBMASTER_EMAIL %>
+	DocumentRoot /usr/local/lib/automx
+
+	SSLEngine On
+
+	SSLCertificateFile 		/etc/ssl/certs/<%= AUTODISCOVER_HOSTNAME %>.pem
+	SSLCertificateKeyFile 		/etc/ssl/private/<%= AUTODISCOVER_HOSTNAME %>.key
+	<%= 
+	if File.exists?("automx/files/ssl/#{AUTODISCOVER_HOSTNAME}.ca.pem") then
+	"SSLCertificateChainFile 	/etc/ssl/certs/#{AUTODISCOVER_HOSTNAME}.ca.pem" 
+	end 
+	%>
+
+	<Directory /usr/local/lib/automx>
+		Require all granted
+	</Directory>
+
+	WSGIScriptAlias /Autodiscover/Autodiscover.xml 	/usr/local/lib/automx/automx_wsgi.py
+	WSGIScriptAlias /autodiscover/autodiscover.xml 	/usr/local/lib/automx/automx_wsgi.py
+	WSGIScriptAlias /mobileconfig 			/usr/local/lib/automx/automx_wsgi.py
+
+</VirtualHost>
+
+<VirtualHost *:80>
+
+	# autoconfig - without ssl for thunderbird
+
+	ServerName <%= AUTODISCOVER_HOSTNAME %>
+	ServerAdmin <%= WEBMASTER_EMAIL %>
+	DocumentRoot /usr/local/lib/automx
+
+    	WSGIScriptAlias /mail/config-v1.1.xml /usr/local/lib/automx/automx_wsgi.py
+
+	<Directory /usr/local/lib/automx>
+		Require all granted
+	</Directory>
+
+	WSGIScriptAlias /Autodiscover/Autodiscover.xml 	/usr/local/lib/automx/automx_wsgi.py
+	WSGIScriptAlias /autodiscover/autodiscover.xml 	/usr/local/lib/automx/automx_wsgi.py
+	WSGIScriptAlias /mobileconfig 			/usr/local/lib/automx/automx_wsgi.py
+
+</VirtualHost>

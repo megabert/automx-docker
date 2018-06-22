@@ -1,0 +1,92 @@
+#!/bin/bash
+
+mylog() {
+	echo "$(date) : $*"
+}
+
+mysql_exec() {
+	mysql -uroot -p"$MYSQL_ROOT_PASSWORD" --batch -e "$1" 
+}
+
+db_exists() {
+	local db="$1"
+	mysql_exec "show databases" | grep -qE "^$db"'$'
+}
+
+user_exists() {
+	local user="$1"
+	mysql_exec "select user from mysql.user where user='$user';" | grep -qE "^$user"'$'
+}
+
+db_create() {
+	local db="$1"
+	if ! db_exists "$db"; then 
+		mylog "db $db does not exist so far, creating db now"
+		mysql_exec "create database $db"
+	else
+		mylog "db $db does exist"
+	fi
+}
+
+db_grant() {
+	local user="$1"
+	local pass="$2"
+	local db="$3"
+
+	mysql_exec "GRANT ALL ON $db.* TO '$user'@'%' IDENTIFIED BY '$pass'"
+}
+
+user_create() {
+	local user="$1"
+	local pass="$2"
+	local db="$3"
+
+	if ! user_exists "$user"; then
+		mylog "user "$user" has no privileges in this system, setting privileges now"
+		db_grant "$user" "$pass" "$db"
+	else
+		mylog "user "$user" has some privileges in this system"
+	fi
+}
+
+load_sql() {
+	local db="$1"
+	local command_file="$2"
+	mylog "loading sql file $command_file"
+	mysql -uroot -p"$MYSQL_ROOT_PASSWORD" --database="$db" --batch <"$command_file"
+}
+
+table_exists() {
+	local db="$1"
+	local table="$2"
+
+	if mysql_exec "use $db; describe $table" &>/dev/null ; then
+		mylog "$db.$table does exist"
+		return 0
+	else
+		mylog "$db.$table does not exist"
+		return 1
+	fi
+
+}
+
+mysql_is_up() {
+        for((x=1;$x<=60;x++));do
+                mysqladmin -uroot -p"$MYSQL_ROOT_PASSWORD" ping 2>&1 | grep -q "mysqld is alive" && return 0
+                echo -n .
+                sleep 1
+        done
+        return 1
+}
+
+# --- start of main program ---
+
+{
+
+if mysql_is_up ; then
+	db_create   <%= AUTOMX_MYSQL_DBNAME %>
+	user_create <%= AUTOMX_MYSQL_USERNAME %> "<%= AUTOMX_MYSQL_PASSWORD%>" <%= AUTOMX_MYSQL_DBNAME %>
+	table_exists <%= AUTOMX_MYSQL_DBNAME %> automx || load_sql <%= AUTOMX_MYSQL_DBNAME %> /automx-init.sql
+fi
+
+} >/tmp/mysql_init.log 2>&1 &

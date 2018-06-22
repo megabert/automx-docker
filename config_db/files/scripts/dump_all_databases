@@ -1,0 +1,74 @@
+#!/bin/bash
+
+LC_ALL=C
+LANG=C
+
+COMPRESS_CMD="gzip -9"
+[[ $COMPRESS_CMD =~ gzip  ]] && COMPRESS_EXT="gz"
+[[ $COMPRESS_CMD =~ xz    ]] && COMPRESS_EXT="xz"
+[[ $COMPRESS_CMD =~ bzip2 ]] && COMPRESS_EXT="bz2"
+
+BACKUP_DIR="/var/backups/mysql"
+BACKUP_USER="root"
+BACKUP_PASS="$MYSQL_ROOT_PASSWORD"
+BACKUP_EXCLUDES="(information_schema)"
+MYSQL_OPTS="--user $BACKUP_USER -p$BACKUP_PASS"
+
+export LC_ALL LANG BACKUP_DIR BACKUP_USER BACKUP_PASS_FILE BACKUP_EXCLUDES MYSQL_OPTS
+
+unalias rm 2>/dev/null
+
+mylog()         { logger -t mysqlbackup -p local7.info "$*"; }
+myerr()         { logger -t mysqlbackup -p local7.info "ERROR: $*"; }
+
+get_databases() {
+
+        echo "show databases" \
+                | mysql $MYSQL_OPTS --skip-column-names \
+                | grep -vE "$BACKUP_EXCLUDES"
+
+}
+
+run_backup() {
+
+	[ -d $BACKUP_DIR/tmp ] || mkdir -p $BACKUP_DIR/tmp
+        rm -f $BACKUP_DIR/tmp/*
+
+        for db in $(get_databases) ; do 
+                if RES="$(mysqldump $MYSQL_OPTS --single-transaction --databases $db \
+                | nice -n 10 $COMPRESS_CMD | split -a 4 -b 50000000 -d - $BACKUP_DIR/tmp/${db}.sql.${COMPRESS_EXT}.)" ; then
+                        mylog "database backup of database $db successful"
+                else
+                        mylog "database backup of database $db failed: $RES"
+                        exit 1
+                fi
+        done
+
+        rm -f $BACKUP_DIR/* 2>/dev/null
+        mv $BACKUP_DIR/tmp/* $BACKUP_DIR
+        mylog "database backup of all databases finished successfully"
+
+} 
+
+check_mysql_up() {
+
+        if ! which mysql &>/dev/null ;then
+                myerr "mysql binary not there, aborting backup"
+                return 1
+        fi
+
+        if ! pgrep mysqld | grep -q . ;then
+                myerr "mysqld not running, aborting backup"
+                return 2
+        fi
+
+        if ! mysqladmin $MYSQL_OPTS | grep -q "mysqld is alive" ; then
+                myerr "no access to mysql server"
+                return 3
+        fi
+}
+
+if check_mysql_up ;then
+        run_backup >>/tmp/mysqldump.log 2>&1 
+fi
+

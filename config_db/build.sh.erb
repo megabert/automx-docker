@@ -1,0 +1,22 @@
+#!/bin/bash 
+
+export LC_ALL=C
+
+. ./ENV
+
+set +e
+
+docker kill config_db
+docker rm   config_db
+docker rmi  config_db
+
+set -e
+
+docker build -t config_db .
+
+docker run 											\
+	-d 											\
+	--env-file=./ENV 									\
+	--name=config_db --mount type=bind,source="$(pwd)"/db_data,target=/var/lib/mysql 	\
+	--mount type=bind,source="$(pwd)"/db_dump,target=/var/backups/mysql  			\
+	<%= CONFIG_DB_DOCKER_RUN_OPTIONS %> -t config_db

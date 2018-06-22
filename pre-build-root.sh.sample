@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# This is a template for a script to be executed
+# before the build process as root
+#
+# I do need the following for my environment:
+#
+# - run setfacl -R on the binded Database directory,
+#   because the permissions are changed inside the
+#   container and after that the outside user is no
+#   longer able to start the container
+#
+# - copy the protected Let's Encrypt SSL-Key from
+#   from etc into the container directory
+#   
+# To use it, rename the script to pre-build-root.sh 
+# (remove the .sample suffix) and configure sudo to 
+# allow your user to call the script as root.
+#
