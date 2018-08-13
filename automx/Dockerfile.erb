@@ -21,7 +21,11 @@ RUN /usr/sbin/a2enmod ssl
 RUN /usr/sbin/a2dissite 000-default.conf
 RUN chown -R www-data:www-data /usr/local/lib/automx
 RUN touch /var/log/automx.log
-RUN chown www-data:www-data /var/log/automx.log
+RUN cp -auxv /automx/src/html/. /usr/local/lib/automx/
+ADD ./files/images /automx/images
+RUN [ -f /automx/images/custom_logo.png ] && cp -ax /automx/images/custom_logo.png /usr/local/lib/automx/img/company-banner.png
+RUN ln /usr/local/lib/automx/index.html.de /usr/local/lib/automx/index.html
+RUN chown www-data:www-data -R /var/log/automx.log /usr/local/lib/automx/
 
 ADD ./files/ssl/<%= AUTODISCOVER_HOSTNAME %>.pem      /etc/ssl/certs/<%= AUTODISCOVER_HOSTNAME %>.pem
 ADD ./files/ssl/<%= AUTODISCOVER_HOSTNAME %>.key      /etc/ssl/private/<%= AUTODISCOVER_HOSTNAME %>.key
