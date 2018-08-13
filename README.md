@@ -1,7 +1,7 @@
 # AutoMX Docker Setup
 
 This is some scripting to set up automx (http://automx.org) as docker containers. 
-There are 2 containers. One for automx and another for Mariadb, where the domain
+There are 2 containers. One for automx and another for MariaDB, where the domain
 configuration is stored.
 
 # Principle of E-Mail-Autoconfiguration
@@ -18,18 +18,18 @@ configuration is stored.
 * A DNS-Record (A or CNAME) autodiscover.yourdomain.tld pointing to your autodiscover service
 * An httpS Server running the autodiscover application
 * A valid SSL-Certificate for autodiscover.yourdomain.tld (if you are trying to serve 
-  multiple domains, you need a valid certificate for all domains, this solution does not work)
+  multiple domains, you need a valid certificate for all domains, this docker setup does not use this Variant)
 
 ### Variant B (Hack, but easier)
 
 * A DNS-Record(A-Record) autodiscover.yourdomain.tld pointing to 0.0.0.0
 * A DNS-Record(SRV-Record) _autodiscover._tcp.yourdomain.tld containing
 
-ttl:			86400
-weight:			0
-priority:		0
-Port:			443
-Server:			autodiscover.servicedomain.tld
+* ttl:			86400
+* weight:			0
+* priority:		0
+* Port:			443
+* Server:			autodiscover.servicedomain.tld
 
 Example: 
 
@@ -55,6 +55,7 @@ To use this installation you need Variant B)
 
 For this docker system you need the following:
 
+* Docker of course
 * Ruby(for the template renderer)
 * A correct DNS-record autodiscover.servicedomain.tld
 * The above mentioned 3 records for each domain you want to serve with autodiscover
@@ -68,12 +69,12 @@ For this docker system you need the following:
 
 A script for this may come later or maybe you write one.
 
-* Figure out the ip addres of the config_db container
+* Figure out the ip address of the config_db container
  
-docker inspect config_db | grep -i ipaddress
+```docker inspect config_db | grep -i ipaddress```
 
 * Install mariadb-client
 
 * adapt and run the following query to insert the data for your domain
 
-mysql -uroot -pYOURROOTPW -h IPADDRESS -e "INSERT INTO automx VALUES(1,'yourdomain.de','yes','yoursmtpserver.domain.tld','587','starttls','plaintext','%s','yes','6','yes','yourimapserver.domain.tld','143','starttls','plaintext','%s','6','yes','yourpop3server.domain.tld','110','starttls','plaintext','%s','6');
+```mysql -uroot -pYOURROOTPW -h IPADDRESS -e "INSERT INTO automx VALUES(1,'yourdomain.de','yes','yoursmtpserver.domain.tld','587','starttls','plaintext','%s','yes','6','yes','yourimapserver.domain.tld','143','starttls','plaintext','%s','6','yes','yourpop3server.domain.tld','110','starttls','plaintext','%s','6');```
